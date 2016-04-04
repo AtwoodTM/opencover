@@ -53,6 +53,7 @@ public:
         m_cuckooSafeToken = 0;
         m_infoHook = nullptr;
         _shortwait = 10000;
+        chained_module_ = nullptr;
     }
 
 DECLARE_REGISTRY_RESOURCEID(IDR_CODECOVERAGE)
@@ -138,7 +139,8 @@ private:
 
     bool m_useOldStyle;
 	ULONG m_threshold;
-	bool m_tracingEnabled;
+    bool m_tracingEnabled;
+    bool safe_mode_;
 
 private:
     std::vector<ULONG> m_thresholds;
@@ -169,6 +171,8 @@ private:
 
 private:
     CComPtr<ICorProfilerCallback4> m_chainedProfiler;
+    HMODULE chained_module_;
+
     CComObject<CProfilerInfo> *m_infoHook;
 
     HRESULT OpenCoverSupportInitialize(IUnknown *pICorProfilerInfoUnk);

@@ -33,7 +33,7 @@ namespace OpenCover.Framework.Utility
         /// </summary>
         /// <param name="fileId"></param>
         /// <returns></returns>
-        public CodeCoverageStringTextSource getCodeCoverageStringTextSource (uint fileId) {
+        public CodeCoverageStringTextSource GetCodeCoverageStringTextSource (uint fileId) {
             CodeCoverageStringTextSource source = null;
             if (fileId != 0) {
                 this.TryGetValue (fileId, out source);
@@ -46,30 +46,12 @@ namespace OpenCover.Framework.Utility
         /// </summary>
         /// <param name="sp">SequencePoint</param>
         /// <returns>string</returns>
-        public string getSequencePointText (SequencePoint sp) {
+        public string GetSequencePointText (SequencePoint sp) {
             if (sp != null) {
-                CodeCoverageStringTextSource source = this.getCodeCoverageStringTextSource (sp.FileId);
+                CodeCoverageStringTextSource source = GetCodeCoverageStringTextSource (sp.FileId);
                 return source != null ? source.GetText(sp) : "";
             }
             return "";
-        }
-        /// <summary>
-        /// True if SequencePoint source-string == "{"
-        /// ATTN: Do not use within .Where (condition)
-        /// </summary>
-        /// <param name="sp"></param>
-        /// <returns></returns>
-        internal bool IsLeftCurlyBraceSequencePoint (SequencePoint sp) {
-            return sp.IsSingleCharSequencePoint && this.getSequencePointText(sp) == "{";
-        }
-        /// <summary>
-        /// True if SequencePoint source-string == "}"
-        /// ATTN: Do not use within .Where (condition)
-        /// </summary>
-        /// <param name="sp"></param>
-        /// <returns></returns>
-        internal bool IsRightCurlyBraceSequencePoint (SequencePoint sp) {
-            return sp.IsSingleCharSequencePoint && this.getSequencePointText(sp) == "}";
         }
 
         #region IDictionary implementation

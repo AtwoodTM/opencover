@@ -234,6 +234,9 @@ namespace OpenCover.Test.Framework.Communication
         {
             var size = Instance.ReadSize;
             Assert.AreNotEqual(0, size);
+            size = Instance.ReadSize; // cover cached size by reading twice
+            Assert.AreNotEqual(0, size);
+            
         }
 
         [Test]
@@ -484,6 +487,19 @@ namespace OpenCover.Test.Framework.Communication
 
             // assert
             Assert.AreEqual(false, response.track);
+        }
+
+        [Test]
+        public void Unsupported_MSG_Type_Throws_Exception()
+        {
+            // arrange 
+            Container.GetMock<IMarshalWrapper>()
+                .Setup(x => x.PtrToStructure<MSG_TrackMethod_Request>(It.IsAny<IntPtr>()))
+                .Returns(new MSG_TrackMethod_Request());
+
+            // act           
+            Assert.Throws<InvalidOperationException>(() => Instance.StandardMessage(MSG_Type.MSG_Unknown, _mockCommunicationBlock.Object, (i, block) => { }, block => { }));
+
         }
     }
 }

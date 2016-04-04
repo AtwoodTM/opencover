@@ -31,15 +31,35 @@ namespace OpenCover.Framework.Model
         /// </summary>
         public FileRef FileRef { get; set; }
 
+        internal UInt32 FileRefUniqueId {
+            get { return FileRef == null? 0 : FileRef.UniqueId; }
+        }
+
         /// <summary>
         /// A list of sequence points that have been produced for this method
         /// </summary>
-        public SequencePoint[] SequencePoints { get; set; }
+        public SequencePoint[] SequencePoints {
+            get {
+                return _sequencePoints;
+            }
+            set {
+                _sequencePoints = value ?? new SequencePoint[0];
+            }
+        }
+        private SequencePoint[] _sequencePoints = new SequencePoint[0];
 
         /// <summary>
         /// A list of branch points that have been identified for this method
         /// </summary>
-        public BranchPoint[] BranchPoints { get; set; }
+        public BranchPoint[] BranchPoints {
+            get {
+                return _branchPoints;
+            }
+            set {
+                _branchPoints = value ?? new BranchPoint[0];
+            }
+        }
+        private BranchPoint[] _branchPoints = new BranchPoint[0];
 
         /// <summary>
         /// A method point to identify the entry of a method
@@ -111,7 +131,8 @@ namespace OpenCover.Framework.Model
         public override void MarkAsSkipped(SkippedMethod reason)
         {
             SkippedDueTo = reason;
-            if (MethodPoint != null) MethodPoint.IsSkipped = true;
+            if (MethodPoint != null) 
+                MethodPoint.IsSkipped = true;
             MethodPoint = null;
             SequencePoints = null;
             BranchPoints = null;
@@ -122,13 +143,12 @@ namespace OpenCover.Framework.Model
         /// <summary>
         /// True if this.FullName matches generated-method-regex-pattern 
         /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
         internal bool IsGenerated {
             get {
         		if (_resolvedIsGenerated == null) {
-        			_resolvedIsGenerated = !String.IsNullOrWhiteSpace(this.FullName)
-                        && this.FullName.Contains("__") // quick test before using regex heavy weapon
-                        && isGeneratedMethodRegex.IsMatch(this.FullName); 
+        			_resolvedIsGenerated = !string.IsNullOrWhiteSpace(FullName)
+                        && FullName.Contains("__") // quick test before using regex heavy weapon
+                        && IsGeneratedMethodRegex.IsMatch(FullName); 
         		}
         		return _resolvedIsGenerated == true;
             }
@@ -137,17 +157,17 @@ namespace OpenCover.Framework.Model
         /// <summary>
         /// Method "::CallName(". (Name excluding return type, namespace and arguments)
         /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
         internal string CallName {
             get {
-                if (_resolvedCallName != null) { return _resolvedCallName; } // cached
-                _resolvedCallName = String.Empty; // init resolve value
-                if (!String.IsNullOrWhiteSpace(this.FullName)) {
-                    int startIndex = this.FullName.IndexOf("::", StringComparison.Ordinal);
+                if (_resolvedCallName != null)
+                    return _resolvedCallName;
+                _resolvedCallName = string.Empty; // init resolve value
+                if (!string.IsNullOrWhiteSpace(FullName)) {
+                    var startIndex = FullName.IndexOf("::", StringComparison.Ordinal);
                     startIndex += 2;
-                    int finalIndex = this.FullName.IndexOf('(', startIndex);
+                    var finalIndex = FullName.IndexOf('(', startIndex);
                     if (startIndex > 1 && finalIndex > startIndex) {
-                        _resolvedCallName = this.FullName // resolve cache
+                        _resolvedCallName = FullName // resolve cache
                             .Substring(startIndex, finalIndex - startIndex);
                     }
                 }
@@ -155,127 +175,12 @@ namespace OpenCover.Framework.Model
             }
         }
 
-        private bool? _resolvedIsGenerated = null;
-        private string _resolvedCallName = null;
-        private static readonly RegexOptions regexOptions = RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.ExplicitCapture;
-        private static readonly Regex isGeneratedMethodRegex = new Regex(@"(<[^\s:>]+>\w__\w)", regexOptions);
+        private bool? _resolvedIsGenerated;
+        private string _resolvedCallName;
+        private const RegexOptions RegexOptions = System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Singleline | System.Text.RegularExpressions.RegexOptions.ExplicitCapture;
+        private static readonly Regex IsGeneratedMethodRegex = new Regex(@"(<[^\s:>]+>\w__\w)", RegexOptions);
 
         #endregion
 
-        #region Extracting structure from FullName using Regex
-
-        /// <summary>
-        /// returnType in Regex(returnType namespacePrefix::methodName([argumentTypes])
-        /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
-        internal string RegexReturnType {
-            get {
-                extractSignature();
-                return _returnType;
-            }
-        }
-
-        /// <summary>
-        /// nameSpacePrefix in Regex(returnType namespacePrefix::methodName([argumentTypes])
-        /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
-        internal string RegexNameSpaceAndClass {
-            get {
-                extractSignature();
-                return _nameSpaceAndClass;
-            }
-        }
-
-        /// <summary>
-        /// methodName in Regex(returnType namespacePrefix::methodName([argumentTypes])
-        /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
-        internal string RegexCallName {
-            get {
-                extractSignature();
-                return _callName;
-            }
-        }
-
-        /// <summary>
-        /// optional argumentTypes in Regex(returnType namespacePrefix::methodName([argumentTypes])
-        /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
-        internal string RegexArgumentTypes {
-            get {
-                extractSignature();
-                return _argumentTypes;
-            }
-        }
-
-        /// <summary>
-        /// RegexReplacedName != String.Empty
-        /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
-        internal bool RegexIsGenerated {
-        	get {
-                extractSignature();
-                return _originalCallName != String.Empty;
-        	}
-        }
-
-        /// <summary>
-        /// Original method name that is replaced by new generated methodName
-        /// </summary>
-        /// <remarks>ATTN: Do not use as .Where predicate</remarks>
-        internal string RegexReplacedName {
-            get {
-                extractSignature();
-                return _originalCallName;
-            }
-        }
-
-        private void extractSignature () {
-
-            if (!_methodSignatureExtracted) { // not yet extracted?
-                _methodSignatureExtracted = true;
-
-                if (string.IsNullOrWhiteSpace(this.FullName)) {
-                    return; // method name is null or empty or white-space
-                }
-
-                var match = methodItemsRegex.Match(this.FullName);
-                if (match.Success) {
-                    foreach (var groupName in methodItemsRegex.GetGroupNames()) {
-                        switch (groupName) {
-                            case "returnType":
-                                _returnType = match.Groups[groupName].Value;
-                                break;
-                            case "nameSpaceAndClass":
-                                _nameSpaceAndClass = match.Groups[groupName].Value;
-                                break;
-                            case "callName":
-                                _callName = match.Groups[groupName].Value;
-                                break;
-                            case "argumentTypes":
-                                _argumentTypes = match.Groups[groupName].Value;
-                                break;
-                        }
-                    }
-
-                    var subMatch = replacedNameRegex.Match(this.FullName);
-                    if (subMatch.Success) {
-                        _originalCallName = subMatch.Groups["originalCallName"].Value;
-                    }
-                }
-            }
-        }
-
-        private static readonly Regex methodItemsRegex = new Regex(@"^(?<returnType>[^\s]+)\s(?<nameSpaceAndClass>[^\s:]+)::(?<callName>[^\(]+)\((?<argumentTypes>[^\)]+)?\)$", regexOptions);
-        private static readonly Regex replacedNameRegex = new Regex(@"<(?<originalCallName>[^\s:>]+)>\w__\w", regexOptions);
-
-        private bool _methodSignatureExtracted = false;
-        private string _returnType = String.Empty;
-        private string _nameSpaceAndClass = String.Empty;
-        private string _callName = String.Empty;
-        private string _argumentTypes = String.Empty;
-        private string _originalCallName = String.Empty;
-
-        #endregion
     }
 }

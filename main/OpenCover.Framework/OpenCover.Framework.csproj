@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>OpenCover.Framework</RootNamespace>
     <AssemblyName>OpenCover.Framework</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
@@ -82,6 +82,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\build\Version\AssemblyCopyright.cs">
+      <Link>Properties\AssemblyCopyright.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>AssemblyCopyright.tt</DependentUpon>
+    </Compile>
     <Compile Include="..\..\build\Version\GlobalAssemblyInfo.cs">
       <Link>Properties\GlobalAssemblyInfo.cs</Link>
     </Compile>
@@ -147,17 +153,27 @@
     <Compile Include="Symbols\SymbolFolder.cs" />
     <Compile Include="Utility\CodeCoverageStringTextSource.cs" />
     <Compile Include="Utility\IPerfCounters.cs" />
+    <Compile Include="Utility\LogHelper.cs" />
     <Compile Include="Utility\PerfCounters.cs" />
+    <Compile Include="Utility\SequencePointComparer.cs" />
     <Compile Include="Utility\ThreadHelper.cs" />
     <Compile Include="Utility\SourceRepository.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\..\build\Version\AssemblyCopyright.tt">
+      <Link>Properties\AssemblyCopyright.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AssemblyCopyright.cs</LastGenOutput>
+    </Content>
     <Content Include="log4net.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" />
